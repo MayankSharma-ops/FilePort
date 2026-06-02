@@ -44,11 +44,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Future routes - not ready for public repo
-frontend/src/app/tools/image/
-frontend/src/app/tools/developer/
-backend/app/converters/image_converters.py
-
 # IDEs and editors
 .vscode/
 .idea/
