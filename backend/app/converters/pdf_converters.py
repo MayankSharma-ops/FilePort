@@ -32,7 +32,11 @@ def _is_scanned_pdf(path: Path) -> bool:
 
 @register("pdf", "docx")
 class PdfToDocxConverter(BaseConverter):
-    """Preserves layout via LibreOffice; falls back to OCR for scanned PDFs."""
+    """Layout-preserving PDF -> DOCX via pdf2docx (text, fonts, tables, images).
+
+    Falls back to OCR for scanned PDFs (which have no extractable text layer).
+    No external binaries (LibreOffice/Poppler) are required.
+    """
 
     source_ext = "pdf"
     target_ext = "docx"
@@ -45,27 +49,46 @@ class PdfToDocxConverter(BaseConverter):
             self._emit(progress, "ocr", 25)
             return self._ocr_pipeline(input_path, output_dir, progress)
 
-        self._emit(progress, "converting", 45)
-        out = _libreoffice_convert(input_path, output_dir, "docx")
-        self._emit(progress, "optimizing", 85)
-        return ConversionResult(output_path=out)
+        self._emit(progress, "converting", 40)
+        return self._layout_pipeline(input_path, output_dir, progress)
+
+    def _layout_pipeline(self, input_path: Path, output_dir: Path, progress: Optional[ProgressCb]) -> ConversionResult:
+        from pdf2docx import Converter
+
+        out = output_dir / (input_path.stem + ".docx")
+        cv = Converter(str(input_path))
+        try:
+            cv.convert(str(out), start=0, end=None)
+        finally:
+            cv.close()
+
+        if not out.exists():
+            raise RuntimeError("pdf2docx produced no output file")
+
+        with fitz.open(input_path) as pdf:
+            pages = len(pdf)
+        self._emit(progress, "finalizing", 95)
+        return ConversionResult(output_path=out, pages=pages)
 
     def _ocr_pipeline(self, input_path: Path, output_dir: Path, progress: Optional[ProgressCb]) -> ConversionResult:
-        from pdf2image import convert_from_path
         import pytesseract
         from docx import Document
 
-        images = convert_from_path(str(input_path), dpi=200)
+        # Render pages with PyMuPDF (no external Poppler dependency needed).
+        pdf = fitz.open(input_path)
         doc = Document()
-        total = len(images) or 1
-        for idx, image in enumerate(images):
+        total = len(pdf) or 1
+        for idx, page in enumerate(pdf):
+            pix = page.get_pixmap(dpi=200)
+            image = Image.open(io.BytesIO(pix.tobytes("png")))
             text = pytesseract.image_to_string(image)
             for paragraph in text.split("\n\n"):
                 if paragraph.strip():
                     doc.add_paragraph(paragraph.strip())
-            if idx < len(images) - 1:
+            if idx < total - 1:
                 doc.add_page_break()
             self._emit(progress, "ocr", 30 + int(50 * (idx + 1) / total))
+        pdf.close()
 
         out = output_dir / (input_path.stem + ".docx")
         doc.save(out)
