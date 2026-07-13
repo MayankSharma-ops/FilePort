@@ -34,6 +34,10 @@ __pycache__/
 backend/storage/*
 !backend/storage/.gitkeep
 
+# Celery beat schedule (runtime state)
+celerybeat-schedule*
+backend/celerybeat-schedule*
+
 # TypeScript build info
 *.tsbuildinfo
 
