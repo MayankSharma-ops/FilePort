@@ -4,95 +4,104 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 15% 8%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 220 14% 96%;
-    --accent-foreground: 220 15% 8%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 220 90% 56%;
+    /* Reference palette: warm paper, print ink, safety orange, index green. */
+    --ref-paper-0: 0.975 0.014 82;
+    --ref-paper-1: 0.995 0.006 82;
+    --ref-paper-2: 0.925 0.025 80;
+    --ref-ink: 0.19 0.022 55;
+    --ref-ink-soft: 0.43 0.028 58;
+    --ref-signal: 0.67 0.225 38;
+    --ref-signal-ink: 0.47 0.16 36;
+    --ref-support: 0.88 0.165 112;
+
+    /* Semantic layer consumed by components. */
+    --background: var(--ref-paper-0);
+    --foreground: var(--ref-ink);
+    --surface: var(--ref-paper-1);
+    --muted: var(--ref-paper-2);
+    --muted-foreground: var(--ref-ink-soft);
+    --accent: var(--ref-signal);
+    --accent-foreground: var(--ref-ink);
+    --signal: var(--ref-signal);
+    --signal-ink: var(--ref-signal-ink);
+    --support: var(--ref-support);
+    --border: 0.76 0.025 76;
+    --input: 0.76 0.025 76;
+    --ring: var(--ref-signal);
+    --color-ink: #24201c;
+    --color-signal: #f25a2b;
   }
 
-
-
+  * { border-color: oklch(var(--border)); }
   html { scroll-behavior: smooth; }
-
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    background-image:
-      radial-gradient(at 12% 20%, hsla(220, 90%, 56%, 0.08) 0px, transparent 50%),
-      radial-gradient(at 88% 0%, hsla(174, 80%, 60%, 0.06) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, hsla(220, 80%, 40%, 0.07) 0px, transparent 50%);
+    background-image: linear-gradient(oklch(var(--foreground) / 0.025) 1px, transparent 1px);
+    background-size: 100% 32px;
   }
-
-  /* Subtle noise overlay */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 1;
+    z-index: 60;
     opacity: 0.035;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/></svg>");
   }
-
-  ::selection { background: hsla(217, 91%, 60%, 0.35); color: white; }
+  ::selection { background: oklch(var(--signal)); color: oklch(var(--foreground)); }
+  :focus-visible { outline: 2px solid oklch(var(--signal)); outline-offset: 3px; }
 }
+
 
 @layer components {
   .glass {
-    @apply bg-white/60 backdrop-blur-xl border border-white/40;
-    box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
-      0 20px 60px -20px rgba(0, 0, 0, 0.08);
+    border: 2px solid oklch(var(--foreground) / 0.8);
+    background: oklch(var(--surface));
+    box-shadow: 4px 4px 0 oklch(var(--foreground) / 0.1);
   }
-
   .glass-strong {
-    @apply bg-white/80 backdrop-blur-2xl border border-white/50;
-    box-shadow:
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
-      0 30px 80px -20px rgba(0, 0, 0, 0.1);
+    @apply border-2 border-foreground bg-surface;
+    box-shadow: 8px 8px 0 var(--color-ink);
   }
-
-  .glow-ring {
-    position: relative;
-  }
+  .glow-ring { position: relative; }
   .glow-ring::before {
     content: "";
-    position: absolute; inset: -1px;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(120deg, rgba(91,157,255,0.6), rgba(45,212,191,0.6), rgba(91,157,255,0.0));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 24%;
+    height: 6px;
+    background: oklch(var(--signal));
     pointer-events: none;
-    opacity: 0.6;
   }
-
-  .text-balance { text-wrap: balance; }
-
   .gradient-text {
-    background: linear-gradient(110deg, #0f172a 0%, #2563eb 35%, #0ea5e9 65%, #0f172a 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 8s linear infinite;
+    color: oklch(var(--foreground));
+    font-style: italic;
   }
-
   .grid-bg {
     background-image:
-      linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 50%, transparent 100%);
+      linear-gradient(to right, oklch(var(--foreground) / 0.055) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(var(--foreground) / 0.055) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(to bottom, #000 20%, transparent 90%);
   }
+  .eyebrow {
+    @apply text-[10px] font-bold uppercase tracking-[0.18em] text-signalInk;
+  }
+  .text-balance { text-wrap: balance; }
 }
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

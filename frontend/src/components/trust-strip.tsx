@@ -1,39 +1,36 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ShieldCheck, Lock, Trash2 } from "lucide-react";
+import { LockKeyhole, ShieldCheck, Trash2 } from "lucide-react";
 
 const items = [
-  { Icon: Lock, title: "No signup required", desc: "Drop a file. Convert. Done. Anonymous by design." },
-  { Icon: Trash2, title: "30-minute auto-delete", desc: "Uploads and outputs vanish from our servers automatically." },
-  { Icon: ShieldCheck, title: "Sandboxed processing", desc: "Conversions run in isolated workers with strict file size limits." },
+  { Icon: LockKeyhole, title: "No account trail", desc: "Convert anonymously. We do not ask for an email before doing the work." },
+  { Icon: Trash2, title: "Timed deletion", desc: "Uploads and outputs are removed automatically after 30 minutes." },
+  { Icon: ShieldCheck, title: "Isolated processing", desc: "Conversions run in sandboxed workers with strict file limits." },
 ];
 
 export function TrustStrip() {
   return (
-    <section className="relative container py-24">
-      <div className="glass-strong rounded-3xl p-8 sm:p-12">
-        <div className="grid md:grid-cols-3 gap-8">
-          {items.map((it, i) => (
-            <motion.div
-              key={it.title}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className="flex gap-4"
-            >
-              <div className="h-10 w-10 rounded-xl glass grid place-items-center flex-shrink-0 bg-blue-50/50 border-blue-200/50 text-blue-600">
-                <it.Icon className="h-4 w-4" />
-              </div>
+    <section className="container py-24 sm:py-32">
+      <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="grid overflow-hidden border-2 border-foreground bg-signal shadow-[10px_10px_0_var(--color-ink)] lg:grid-cols-[0.7fr_1.3fr]">
+        <div className="relative min-h-80 border-b-2 border-foreground p-8 lg:border-b-0 lg:border-r-2 lg:p-12">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em]">Privacy protocol / Active</p>
+          <div className="mt-10 font-display text-[10rem] leading-[0.65] tracking-[-0.07em] sm:text-[13rem]">30</div>
+          <p className="mt-8 max-w-xs text-sm font-bold uppercase leading-6 tracking-[0.08em]">Minutes until every upload and output is gone.</p>
+          <div className="absolute right-8 top-8 h-3 w-3 animate-pulse rounded-full bg-foreground" />
+        </div>
+        <div className="bg-surface">
+          {items.map((item, index) => (
+            <div key={item.title} className="grid gap-5 border-b-2 border-foreground p-7 last:border-b-0 sm:grid-cols-[42px_1fr] lg:p-10">
+              <div className="grid h-10 w-10 place-items-center border-2 border-foreground bg-support"><item.Icon className="h-5 w-5" /></div>
               <div>
-                <div className="font-semibold text-foreground tracking-tight">{it.title}</div>
-                <p className="text-sm text-muted-foreground/90 mt-1.5 leading-relaxed font-sans">{it.desc}</p>
+                <div className="flex items-center justify-between gap-4"><h3 className="font-display text-3xl">{item.title}</h3><span className="text-[9px] font-bold text-muted-foreground">0{index + 1}</span></div>
+                <p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{item.desc}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -2,76 +2,66 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Github, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 const NAV = [
-  { label: "PDF Tools", href: "/tools/pdf" },
-  { label: "Image Tools", href: "/tools/image" },
+  { label: "PDF tools", href: "/tools/pdf" },
+  { label: "Image tools", href: "/tools/image" },
   { label: "Developer", href: "/tools/developer" },
+  { label: "All tools", href: "/tools" },
 ];
 
 export function Navbar() {
   const { scrollY } = useScroll();
-  const opacity = useTransform(scrollY, [0, 80], [0, 1]);
-  const blur = useTransform(scrollY, [0, 80], [0, 14]);
-  const filter = useTransform(blur, (b) => `blur(${b}px)`);
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => setMounted(true), []);
+  const background = useTransform(scrollY, [0, 60], ["oklch(0.975 0.014 82 / 0)", "oklch(0.975 0.014 82 / .94)"]);
+  const [open, setOpen] = React.useState(false);
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50">
-      <motion.div
-        aria-hidden
-        style={{ opacity, backdropFilter: filter, WebkitBackdropFilter: filter }}
-        className="absolute inset-0 bg-background/60 border-b border-white/5"
-      />
-      <nav className="relative container flex items-center justify-between h-16">
-        <Link href="/" className="group inline-flex items-center gap-2">
-          <span className="relative h-7 w-7 rounded-lg bg-gradient-to-br from-glow-blue to-glow-teal shadow-[0_0_24px_-4px_rgba(91,157,255,0.6)]">
-            <span className="absolute inset-[3px] rounded-md bg-background/80 grid place-items-center text-[10px] font-display font-semibold tracking-widest">
-              G
-            </span>
-          </span>
-          <span className="font-display font-bold text-base tracking-tight text-foreground/90">GathorDocs</span>
+    <header className="fixed inset-x-0 top-0 z-50 border-b-2 border-foreground/10">
+      <motion.div aria-hidden style={{ background }} className="absolute inset-0 backdrop-blur-md" />
+      <nav className="container relative flex h-[72px] items-center justify-between">
+        <Link href="/" className="group inline-flex items-stretch border-2 border-foreground bg-surface" onClick={() => setOpen(false)}>
+          <span className="grid h-9 w-9 place-items-center bg-signal font-bold">G/</span>
+          <span className="hidden items-center px-3 text-sm font-bold uppercase tracking-[0.12em] min-[360px]:flex">Gathor<span className="text-signalInk">Docs</span></span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-1 text-sm font-medium">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "relative px-3 py-2 rounded-md text-muted-foreground hover:text-blue-600 transition-colors",
-                "after:content-[''] after:absolute after:left-3 after:right-3 after:bottom-1 after:h-[1.5px]",
-                "after:bg-gradient-to-r after:from-blue-600/0 after:via-blue-500/80 after:to-teal-400/0",
-                "after:opacity-0 hover:after:opacity-100 after:transition-opacity"
-              )}
-            >
-              {item.label}
+        <div className="hidden items-center gap-7 lg:flex">
+          {NAV.map((item, index) => (
+            <Link key={item.href} href={item.href} className="group relative text-xs font-bold uppercase tracking-[0.11em] text-muted-foreground transition-colors hover:text-foreground">
+              <span className="mr-1 text-[9px] text-signalInk">0{index + 1}</span>{item.label}
+              <span className="absolute -bottom-2 left-0 h-0.5 w-0 bg-signal transition-all group-hover:w-full" />
             </Link>
           ))}
         </div>
 
         <div className="flex items-center gap-2">
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub"
-            className="h-9 w-9 grid place-items-center rounded-full border border-black/10 hover:border-black/25 transition-colors text-muted-foreground hover:text-foreground"
-          >
-            <Github className="h-4 w-4" />
-          </a>
           <Button asChild size="sm" className="hidden sm:inline-flex">
-            <Link href="/#convert">Start Converting</Link>
+            <Link href="/#convert">Open converter <ArrowUpRight className="h-3.5 w-3.5" /></Link>
           </Button>
+          <button type="button" onClick={() => setOpen((value) => !value)} aria-label="Toggle navigation" aria-expanded={open} className="grid h-10 w-10 place-items-center border-2 border-foreground bg-surface lg:hidden">
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </nav>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="absolute inset-x-0 top-[72px] border-b-2 border-foreground bg-background p-6 shadow-[0_10px_0_oklch(var(--foreground)/0.08)] lg:hidden">
+            <div className="container grid p-0">
+              {NAV.map((item, index) => (
+                <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="flex items-center justify-between border-b border-foreground/20 py-4 font-display text-3xl">
+                  <span>{item.label}</span><span className="font-sans text-[10px] font-bold text-signalInk">0{index + 1}</span>
+                </Link>
+              ))}
+              <Button asChild variant="glow" size="lg" className="mt-6 sm:hidden">
+                <Link href="/#convert" onClick={() => setOpen(false)}>Open converter <ArrowUpRight className="h-4 w-4" /></Link>
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

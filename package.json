@@ -2,10 +2,10 @@
   "name": "fileport",
   "version": "0.1.0",
   "private": true,
-  "description": "Runs the full GathorDocs stack with one command.",
+  "description": "Runs the full GathorDocs stack (API, Celery worker, Celery beat, frontend) with one command.",
   "scripts": {
     "dev": "concurrently -k -n api,worker,beat,web -c blue,green,magenta,cyan \"npm run dev:api\" \"npm run dev:worker\" \"npm run dev:beat\" \"npm run dev:web\"",
-    "dev:api": "cd backend && .venv\\Scripts\\python.exe -m uvicorn app.main:app --port 8000",
+    "dev:api": "cd backend && .venv\\Scripts\\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000",
     "dev:worker": "cd backend && .venv\\Scripts\\python.exe -m celery -A app.celery_app.celery worker --loglevel=info --pool=solo",
     "dev:beat": "cd backend && .venv\\Scripts\\python.exe -m celery -A app.celery_app.celery beat --loglevel=info",
     "dev:web": "cd frontend && npm run dev"

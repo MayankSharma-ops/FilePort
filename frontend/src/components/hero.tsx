@@ -1,92 +1,61 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Lock, Sparkles, Zap, ShieldCheck } from "lucide-react";
+import { ArrowDownRight, LockKeyhole, Zap } from "lucide-react";
 import { ConverterFlow } from "@/components/converter/flow";
 import { AmbientBackground } from "@/components/ambient-background";
 
 const reveal = {
-  initial: { opacity: 0, y: 14, filter: "blur(10px)" },
+  initial: { opacity: 0, y: 24 },
   animate: (i: number) => ({
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: i * 0.08 },
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: i * 0.09 },
   }),
 };
 
 export function Hero() {
   return (
-    <section className="relative min-h-[100svh] flex flex-col items-center justify-start pt-32 pb-24 overflow-hidden">
+    <section className="relative min-h-[100svh] overflow-hidden pb-24 pt-28 lg:pb-32 lg:pt-36">
       <AmbientBackground />
+      <div className="container relative">
+        <div className="mb-10 flex items-center justify-between border-b-2 border-foreground pb-3 text-[10px] font-bold uppercase tracking-[0.18em]">
+          <span>Independent conversion desk</span>
+          <span className="hidden text-muted-foreground sm:block">PDF · Documents · Images · Code</span>
+        </div>
 
-      <motion.div
-        custom={0}
-        variants={reveal}
-        initial="initial"
-        animate="animate"
-        className="container relative text-center"
-      >
-        <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] font-semibold text-blue-700 bg-blue-50/50 border border-blue-100/60 rounded-full px-4 py-1.5 shadow-sm">
-          <Sparkles className="h-3.5 w-3.5 text-blue-500 animate-pulse" /> AI-native conversion · privacy first
-        </span>
-      </motion.div>
+        <div className="grid items-start gap-14 lg:grid-cols-[0.92fr_1.08fr] lg:gap-16">
+          <div className="relative">
+            <motion.p custom={0} variants={reveal} initial="initial" animate="animate" className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-signalInk">
+              <span className="h-2 w-2 bg-signal" /> Conversion without compromise
+            </motion.p>
+            <motion.h1 custom={1} variants={reveal} initial="initial" animate="animate" className="max-w-2xl font-display text-[clamp(4.5rem,10vw,8.75rem)] leading-[0.73] tracking-[-0.055em]">
+              Files change <em className="font-normal text-signal">shape.</em>
+              <span className="mt-4 block">Nothing else does.</span>
+            </motion.h1>
+            <motion.p custom={2} variants={reveal} initial="initial" animate="animate" className="mt-9 max-w-lg border-l-2 border-signal pl-5 text-base leading-7 text-muted-foreground sm:text-lg">
+              Precise, private file conversion that keeps your layouts, tables, and type exactly where they belong.
+            </motion.p>
+            <motion.div custom={3} variants={reveal} initial="initial" animate="animate" className="mt-10 grid max-w-lg grid-cols-2 border-2 border-foreground bg-surface text-xs font-bold uppercase tracking-[0.08em]">
+              <div className="flex items-center gap-2 border-r-2 border-foreground p-4"><Zap className="h-4 w-4 text-signalInk" /> No signup</div>
+              <div className="flex items-center gap-2 p-4"><LockKeyhole className="h-4 w-4 text-signalInk" /> Auto-delete</div>
+            </motion.div>
+          </div>
 
-      <motion.h1
-        custom={1}
-        variants={reveal}
-        initial="initial"
-        animate="animate"
-        className="container relative text-center mt-8 font-display font-extrabold text-5xl sm:text-7xl md:text-8xl tracking-tight text-balance leading-[0.95]"
-      >
-        <span className="gradient-text">Convert anything.</span>
-        <br />
-        <span className="text-foreground/95">Beautifully.</span>
-      </motion.h1>
 
-      <motion.p
-        custom={2}
-        variants={reveal}
-        initial="initial"
-        animate="animate"
-        className="container relative max-w-2xl mt-8 text-center text-base sm:text-lg text-muted-foreground leading-relaxed text-balance"
-      >
-        Modern file conversion <strong className="font-semibold text-foreground">without the friction</strong>. No signup, no clutter. Layouts, fonts, and tables stay <strong className="font-semibold text-foreground">intact</strong>. Files vanish from our servers in <strong className="font-semibold text-foreground">30 minutes</strong>.
-      </motion.p>
-
-      <motion.div
-        custom={3}
-        variants={reveal}
-        initial="initial"
-        animate="animate"
-        className="container relative mt-10 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground"
-      >
-        <Pill icon={Zap} label="Instant" />
-        <Pill icon={ShieldCheck} label="Formatting preserved" />
-        <Pill icon={Lock} label="Auto-deletes in 30 min" />
-      </motion.div>
-
-      <motion.div
-        custom={5}
-        variants={reveal}
-        initial="initial"
-        animate="animate"
-        className="container relative mt-14"
-      >
-        <ConverterFlow />
-      </motion.div>
-
-      <p className="container relative text-center mt-6 text-[11px] text-muted-foreground/80">
-        Files are automatically deleted for privacy.
-      </p>
+          <motion.div custom={4} variants={reveal} initial="initial" animate="animate" className="relative lg:mt-10">
+            <div className="mb-3 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+              <span>Conversion desk / Ready</span>
+              <span className="flex items-center gap-2"><span className="h-2 w-2 animate-pulse rounded-full bg-support ring-1 ring-foreground" /> System online</span>
+            </div>
+            <ConverterFlow />
+            <div className="mt-5 flex items-start justify-between gap-6 text-[10px] font-bold uppercase leading-5 tracking-[0.1em] text-muted-foreground">
+              <span>Max file size / 100 MB</span>
+              <span className="flex items-center gap-1 text-right">Select output after upload <ArrowDownRight className="h-4 w-4 text-signalInk" /></span>
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </section>
-  );
-}
-
-function Pill({ icon: Icon, label }: { icon: any; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100/50 bg-blue-50/30 text-blue-700/90 px-3 py-1.5 text-xs font-semibold shadow-sm">
-      <Icon className="h-3.5 w-3.5 text-blue-500" /> {label}
-    </span>
   );
 }

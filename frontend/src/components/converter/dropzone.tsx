@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useDropzone } from "react-dropzone";
-import { motion, AnimatePresence } from "framer-motion";
-import { UploadCloud, Lock, Sparkles, AlertCircle } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertCircle, ArrowDown, FileUp, LockKeyhole } from "lucide-react";
 import { uploadFile } from "@/lib/api";
 import { useConverter } from "@/store/converter";
 import { extOf, formatBytes } from "@/lib/utils";
@@ -16,7 +16,6 @@ const ACCEPT = {
   "image/png": [".png"],
   "image/webp": [".webp"],
 };
-
 const SUPPORTED = ["PDF", "DOCX", "JPG", "PNG", "WEBP"];
 
 export function Dropzone() {
@@ -26,23 +25,20 @@ export function Dropzone() {
   const setError = useConverter((s) => s.setError);
   const [busy, setBusy] = React.useState(false);
 
-  const handleFile = React.useCallback(
-    async (file: File) => {
-      setBusy(true);
-      setStep("uploading");
-      setFile(file);
-      try {
-        const res = await uploadFile(file);
-        setUpload(res);
-        setStep("format");
-      } catch (e: any) {
-        setError(typeof e?.message === "string" ? e.message : "Upload failed");
-      } finally {
-        setBusy(false);
-      }
-    },
-    [setError, setFile, setStep, setUpload]
-  );
+  const handleFile = React.useCallback(async (file: File) => {
+    setBusy(true);
+    setStep("uploading");
+    setFile(file);
+    try {
+      const res = await uploadFile(file);
+      setUpload(res);
+      setStep("format");
+    } catch (error: any) {
+      setError(typeof error?.message === "string" ? error.message : "Upload failed");
+    } finally {
+      setBusy(false);
+    }
+  }, [setError, setFile, setStep, setUpload]);
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
     accept: ACCEPT,
@@ -54,111 +50,55 @@ export function Dropzone() {
   return (
     <motion.div
       {...(getRootProps() as any)}
-      initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      className={cn(
-        "group relative cursor-pointer select-none rounded-3xl",
-        "glass-strong glow-ring",
-        "px-8 sm:px-12 py-12 sm:py-16",
-        "transition-transform will-change-transform",
-        isDragActive && "scale-[1.015]",
-        isDragReject && "ring-2 ring-red-400/50"
-      )}
-      style={{ transform: "translateZ(0)" }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+      className={cn("group relative cursor-pointer select-none border-2 border-foreground bg-surface shadow-[8px_8px_0_var(--color-ink)] transition-all", isDragActive && "-translate-x-1 -translate-y-1 shadow-[12px_12px_0_var(--color-signal)]", isDragReject && "border-red-700")}
     >
       <input {...getInputProps()} />
-
-      {/* Animated glow orbits */}
+      <div className="absolute -top-3 left-6 border-2 border-foreground bg-support px-3 py-1 text-[9px] font-bold uppercase tracking-[0.16em]">Input / 01</div>
       <AnimatePresence>
-        {isDragActive && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="pointer-events-none absolute -inset-px rounded-3xl"
-            style={{
-              background:
-                "conic-gradient(from 0deg, rgba(91,157,255,0.0), rgba(91,157,255,0.7), rgba(139,109,255,0.7), rgba(91,157,255,0.0))",
-              filter: "blur(20px)",
-            }}
-          />
-        )}
+        {isDragActive && <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} exit={{ scaleX: 0 }} className="absolute inset-x-0 top-0 h-2 origin-left bg-signal" />}
       </AnimatePresence>
 
-      <div className="relative flex flex-col items-center text-center gap-5">
-        <motion.div
-          animate={isDragActive ? { y: -6, scale: 1.05 } : { y: [0, -4, 0] }}
-          transition={
-            isDragActive
-              ? { duration: 0.4 }
-              : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }
-          }
-          className="relative h-16 w-16 rounded-2xl glass grid place-items-center"
-        >
-          <UploadCloud className="h-7 w-7 text-foreground/90" />
-          <div
-            aria-hidden
-            className="absolute inset-0 rounded-2xl"
-            style={{
-              background:
-                "radial-gradient(closest-side, rgba(91,157,255,0.35), transparent 70%)",
-              filter: "blur(20px)",
-            }}
-          />
+      <div className="grid gap-8 px-6 pb-7 pt-10 sm:grid-cols-[1fr_auto] sm:px-9 sm:pb-9">
+        <div>
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Accepts documents & images</p>
+          <h2 className="font-display text-4xl leading-none tracking-tight sm:text-5xl">
+            {busy ? "Uploading your file…" : isDragActive ? "Release to upload." : "Drop a file here."}
+          </h2>
+          <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">Or click anywhere in this panel to choose one from your device.</p>
+        </div>
+        <motion.div animate={isDragActive ? { y: 6 } : { y: [0, 5, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }} className="grid h-24 w-full place-items-center border-2 border-foreground bg-signal sm:h-28 sm:w-28">
+          {isDragActive ? <ArrowDown className="h-10 w-10" /> : <FileUp className="h-10 w-10" />}
         </motion.div>
-
-        <div className="space-y-2">
-          <p className="font-display text-2xl sm:text-3xl tracking-tight">
-            {busy ? "Uploading…" : isDragActive ? "Drop it like it's hot" : "Drop your file to begin"}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            or <span className="text-foreground underline-offset-4 underline decoration-foreground/30">browse files</span>
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {SUPPORTED.map((s) => (
-            <span
-              key={s}
-              className="text-[11px] tracking-wider text-muted-foreground/80 px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.03]"
-            >
-              {s}
-            </span>
-          ))}
-        </div>
-
-        <div className="mt-2 flex items-center gap-4 text-[11px] text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            <Lock className="h-3.5 w-3.5" /> Files auto-delete after 30 min
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5" /> No signup
-          </span>
-        </div>
-
-        {isDragReject && (
-          <p className="text-xs text-red-400 inline-flex items-center gap-1.5">
-            <AlertCircle className="h-3.5 w-3.5" /> File type not supported
-          </p>
-        )}
       </div>
+
+
+      <div className="grid border-t-2 border-foreground sm:grid-cols-[1fr_auto]">
+        <div className="flex flex-wrap items-center gap-2 p-4 sm:px-7">
+          {SUPPORTED.map((format) => <span key={format} className="border border-foreground/30 bg-background px-2 py-1 text-[9px] font-bold tracking-[0.12em]">{format}</span>)}
+        </div>
+        <div className="flex items-center gap-2 border-t-2 border-foreground bg-muted px-5 py-4 text-[9px] font-bold uppercase tracking-[0.1em] sm:border-l-2 sm:border-t-0">
+          <LockKeyhole className="h-3.5 w-3.5 text-signalInk" /> Deleted after 30 min
+        </div>
+      </div>
+
+      {isDragReject && (
+        <div className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-2 border-2 border-t-0 border-red-700 bg-red-50 px-3 py-2 text-xs font-bold text-red-800">
+          <AlertCircle className="h-4 w-4" /> This file type is not supported
+        </div>
+      )}
     </motion.div>
   );
 }
 
 export function FilePreview({ file }: { file: File }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass rounded-2xl px-5 py-4 mt-4 flex items-center justify-between gap-4"
-    >
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4 flex items-center justify-between gap-4 border-2 border-foreground bg-surface px-5 py-4">
       <div className="min-w-0">
-        <div className="text-sm font-medium truncate">{file.name}</div>
-        <div className="text-xs text-muted-foreground">
-          {formatBytes(file.size)} · {extOf(file.name).toUpperCase()}
-        </div>
+        <div className="truncate text-sm font-bold">{file.name}</div>
+        <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{formatBytes(file.size)} · {extOf(file.name).toUpperCase()}</div>
       </div>
     </motion.div>
   );

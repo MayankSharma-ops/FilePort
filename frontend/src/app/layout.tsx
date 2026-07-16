@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Archivo, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 
-const inter = Inter({
+const sans = Archivo({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 });
 
-const display = Space_Grotesk({
+const display = Instrument_Serif({
   subsets: ["latin"],
+  weight: "400",
   variable: "--font-display",
   display: "swap",
 });
@@ -20,23 +21,15 @@ const display = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL("https://gathordocs.com"),
   title: {
-    default: "GathorDocs — Convert Anything. Beautifully.",
+    default: "GathorDocs — Files change shape. Nothing else does.",
     template: "%s · GathorDocs",
   },
   description:
-    "Premium AI-native file conversion. PDF, DOCX, image and developer tools. No signup. Files auto-delete after 30 minutes.",
-  keywords: [
-    "PDF to DOCX",
-    "DOCX to PDF",
-    "Compress PDF",
-    "Merge PDF",
-    "Image converter",
-    "GathorDocs",
-  ],
+    "Precise PDF, document, image and developer tools. No signup. Files auto-delete after 30 minutes.",
+  keywords: ["PDF to DOCX", "DOCX to PDF", "Compress PDF", "Merge PDF", "Image converter", "GathorDocs"],
   openGraph: {
-    title: "GathorDocs — Convert Anything. Beautifully.",
-    description:
-      "Premium AI-native file conversion. No signup. Files auto-delete after 30 minutes.",
+    title: "GathorDocs — Precise file conversion",
+    description: "Fast, private file tools with no signup. Files auto-delete after 30 minutes.",
     type: "website",
     url: "https://gathordocs.com",
     siteName: "GathorDocs",
@@ -44,14 +37,14 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "GathorDocs",
-    description: "Convert Anything. Beautifully.",
+    description: "Files change shape. Nothing else does.",
   },
   robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${display.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${sans.variable} ${display.variable}`}>
       <body className="min-h-screen overflow-x-hidden">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
           <Navbar />
