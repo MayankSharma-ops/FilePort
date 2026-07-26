@@ -1,0 +1,94 @@
+name: fileport
+
+x-backend-environment: &backend-environment
+  POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+  POSTGRES_DB: ${POSTGRES_DB:-gathordocs}
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  REDIS_URL: redis://redis:6379/0
+  STORAGE_DIR: /app/storage
+  FILE_TTL_MINUTES: ${FILE_TTL_MINUTES:-30}
+  MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-104857600}
+  ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+  RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-30}
+
+x-backend-service: &backend-service
+  build:
+    context: ./backend
+  image: fileport-backend:local
+  init: true
+  restart: unless-stopped
+  environment: *backend-environment
+  volumes:
+    - job_storage:/app/storage
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:16.10-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-gathordocs}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7.4.5-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    <<: *backend-service
+    ports:
+      - "8000:8000"
+
+  worker:
+    <<: *backend-service
+    command: ["celery", "-A", "app.celery_app:celery", "worker", "--loglevel=info"]
+    healthcheck:
+      disable: true
+    stop_grace_period: 30s
+
+  beat:
+    <<: *backend-service
+    command: ["celery", "-A", "app.celery_app:celery", "beat", "--loglevel=info", "--schedule=/tmp/celerybeat-schedule"]
+    healthcheck:
+      disable: true
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+    image: fileport-frontend:local
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  job_storage:
