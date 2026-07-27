@@ -1,4 +1,5 @@
 from celery import Celery
+import ssl
 from celery.schedules import crontab
 
 from .config import get_settings
@@ -22,6 +23,13 @@ celery.conf.update(
     task_time_limit=600,
     task_soft_time_limit=540,
     worker_max_tasks_per_child=50,
+    
+    broker_use_ssl={
+        "ssl_cert_reqs": ssl.CERT_REQUIRED,
+    },
+    redis_backend_use_ssl={
+        "ssl_cert_reqs": ssl.CERT_REQUIRED,
+    },
 )
 
 celery.conf.beat_schedule = {
